@@ -1,0 +1,79 @@
+def membership_f(x,a,b,c,d):
+    if x<=a or x>=d:
+        return 0.0
+    elif a<x<=b :
+        return (x-a)/(b-a)
+    elif b<x<=c:
+        return 1
+    elif c<x<d:
+        return (d-x)/(d-c)
+    
+def input1_f(input1):
+    dark = membership_f(input1, 0,0,40,50)
+    dim = membership_f(input1, 40,100,150,150)
+    bright=membership_f(input1, 100,150,500,500)
+
+    return {"dark": dark, "dim": dim, "bright" : bright}
+    
+def input2_f(input2):
+    dim=membership_f(input2,0,0,20,30)
+    low=membership_f(input2,20,40,50,50)
+    medium=membership_f(input2,40,60,70,70)
+    high=membership_f(input2,60,80,90,90)
+    bright=membership_f(input2,80,90,100,100)
+
+    return {"dim":dim, "low":low, "medium":medium, "high":high, "bright":bright}
+
+def evaluate_rules(input1, input2):
+    in1=input1_f(input1)
+    in2=input2_f(input2)
+
+    rule_outputs = {}
+
+    rule_outputs["dim1"]=min(in1["dark"], in2["dim"] )
+    rule_outputs["low1"]=min(in1["dark"], in2["low"])
+    rule_outputs["dim2"]=min(in1["dim"], in2["low"])
+    rule_outputs["medium1"]=min(in1["dim"], in2["medium"])
+    rule_outputs["bright1"]=min(in1["bright"], in2["bright"])
+
+    return rule_outputs
+
+def defuzzify(rule_outputs):
+    x = range(0, 101)
+    numerator = 0.0
+    denominator = 0.0
+    
+    for i in x:
+        mu = 0.0
+        
+        if i<=20 and max(rule_outputs.get("dim1", 0), rule_outputs.get("dim2", 0)) > mu:
+            mu = max(rule_outputs.get("dim1", 0), rule_outputs.get("dim2", 0))
+        
+        elif 20 <= i <= 50 and rule_outputs.get("low1", 0) > mu:
+            mu = rule_outputs.get("low1", 0)
+        
+        elif 40 <= i <= 70 and rule_outputs.get("medium1", 0) > mu:
+            mu = rule_outputs.get("medium1", 0)
+        
+        elif 60 <= i <= 90 and rule_outputs.get("high1", 0) > mu:
+            mu = rule_outputs.get("high1", 0)
+        
+        elif 80 <= i <= 100 and rule_outputs.get("bright1", 0) > mu:
+            mu = rule_outputs.get("bright1", 0)
+        
+        numerator += i * mu
+        denominator += mu
+    
+    return numerator / denominator if denominator > 0 else 0.0
+
+def main():
+    input1 = 75
+    input2 = 45
+    rule_outputs = evaluate_rules(input1, input2)
+    brightness = defuzzify(rule_outputs) 
+    print("Ans is ", brightness)
+
+
+
+if _name_ == "_main_":
+    main()
